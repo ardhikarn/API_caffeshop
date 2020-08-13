@@ -2,13 +2,15 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
-const { request, response } = require("express");
+const routerNavigation = require("./src/index");
 
 // middleware
 app.use(bodyParser.json()); //utk row
 app.use(bodyParser.urlencoded({ extended: false })); //utk urlencoded
 
 app.use(morgan("dev"));
+
+app.use("/", routerNavigation);
 
 app.get("*", (request, response) => {
   response.status(404).send("Path Not Found");
