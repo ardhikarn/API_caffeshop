@@ -1,18 +1,17 @@
-// butuh connection dari mysql jadi harus import dari config
 const connection = require("../config/mysql");
 
 module.exports = {
-  getAllProduct: () => {
+  getAllHistory: () => {
     return new Promise((resolve, reject) => {
-      connection.query("SELECT * FROM product", (error, result) => {
+      connection.query("SELECT * FROM history", (error, result) => {
         !error ? resolve(result) : reject(new Error(error));
       });
     });
   },
-  getProductById: (id) => {
+  getHistoryById: (id) => {
     return new Promise((resolve, reject) => {
       connection.query(
-        "SELECT * FROM product WHERE product_id = ?",
+        "SELECT * FROM history WHERE history_id = ?",
         id,
         (error, result) => {
           !error ? resolve(result) : reject(new Error(error));
@@ -20,26 +19,15 @@ module.exports = {
       );
     });
   },
-  getProductByName: (name) => {
+  postHistory: (addData) => {
     return new Promise((resolve, reject) => {
       connection.query(
-        "SELECT * FROM product WHERE product_name = ?",
-        name,
-        (error, result) => {
-          !error ? resolve(result) : reject(new Error(error));
-        }
-      );
-    });
-  },
-  postProduct: (addData) => {
-    return new Promise((resolve, reject) => {
-      connection.query(
-        "INSERT INTO product SET ?",
+        "INSERT INTO history SET ?",
         addData,
         (error, result) => {
           if (!error) {
             const newResult = {
-              product_id: result.insertId,
+              history_id: result.insertId,
               ...addData,
             };
             resolve(newResult);
@@ -50,15 +38,15 @@ module.exports = {
       );
     });
   },
-  patchProduct: (updateData, id) => {
+  patchHistory: (updateData, id) => {
     return new Promise((resolve, reject) => {
       connection.query(
-        "UPDATE product SET ? WHERE product_id = ?",
+        "UPDATE history SET ? WHERE history_id = ?",
         [updateData, id],
         (error, result) => {
           if (!error) {
             const newResult = {
-              product_id: id,
+              history_id: id,
               ...updateData,
             };
             resolve(newResult);
@@ -69,15 +57,15 @@ module.exports = {
       );
     });
   },
-  deleteProduct: (id) => {
+  deleteHistory: (id) => {
     return new Promise((resolve, reject) => {
       connection.query(
-        "DELETE FROM product WHERE product_id = ?",
+        "DELETE FROM history WHERE history_id = ?",
         id,
         (error, result) => {
           if (!error) {
             const newResult = {
-              product_id: id,
+              history_id: id,
             };
             resolve(newResult);
           } else {

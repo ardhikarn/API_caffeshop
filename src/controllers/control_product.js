@@ -38,7 +38,12 @@ module.exports = {
   },
   getProductByName: async (request, response) => {
     try {
-    } catch (error) {}
+      const { name } = request.params;
+      const result = await getProductByName(name);
+      console.log(result);
+    } catch (error) {
+      return helper.response(response, 400, "Bad Request", error);
+    }
   },
   postProduct: async (request, response) => {
     try {
