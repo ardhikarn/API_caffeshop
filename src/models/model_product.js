@@ -2,17 +2,34 @@
 const connection = require("../config/mysql");
 
 module.exports = {
-  getAllProduct: () => {
+  getProduct: (limit, offset, search, sort) => {
     return new Promise((resolve, reject) => {
-      connection.query("SELECT * FROM product", (error, result) => {
-        !error ? resolve(result) : reject(new Error(error));
-      });
+      connection.query(
+        `SELECT * FROM product WHERE product_name LIKE "%${search}%" ORDER BY ${sort} ASC LIMIT ? OFFSET ?`,
+        [limit, offset],
+        (error, result) => {
+          !error ? resolve(result) : reject(new Error(error));
+        }
+      );
+    });
+  },
+  getProductCount: () => {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        "SELECT COUNT(*) as total FROM product",
+        (error, result) => {
+          !error ? resolve(result[0].total) : reject(new Error(error));
+        }
+      );
     });
   },
   getProductById: (id) => {
     return new Promise((resolve, reject) => {
       connection.query(
-        "SELECT * FROM product WHERE product_id = ?",
+        `SELECT product.product_id, product.product_name, product.product_image, 
+            product.product_price, product.category_id, category.category_name, product.product_created_at, product.product_updated_at, 
+            product.product_status FROM product INNER JOIN category ON product.category_id = category.category_id 
+            WHERE product_id = ?`,
         id,
         (error, result) => {
           !error ? resolve(result) : reject(new Error(error));
@@ -23,8 +40,11 @@ module.exports = {
   getProductByName: (name) => {
     return new Promise((resolve, reject) => {
       connection.query(
-        "SELECT * FROM product WHERE product_name = ?",
-        name,
+        `SELECT product.product_id, product.product_name, product.product_image, 
+            product.product_price, product.category_id, category.category_name, product.product_created_at, product.product_updated_at, 
+            product.product_status FROM product INNER JOIN category ON product.category_id = category.category_id 
+            WHERE product_name = ?`,
+        `%${name}%`,
         (error, result) => {
           !error ? resolve(result) : reject(new Error(error));
         }

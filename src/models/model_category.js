@@ -31,6 +31,7 @@ module.exports = {
               ...addData,
             };
             resolve(newResult);
+            // console.log(newResult);
           } else {
             reject(new Error(error));
           }

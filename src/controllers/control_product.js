@@ -1,25 +1,81 @@
 const { request } = require("express");
 const {
-  getAllProduct,
+  getProduct,
+  getProductCount,
   getProductById,
   getProductByName,
   postProduct,
   patchProduct,
   deleteProduct,
 } = require("../models/model_product");
+const qs = require("querystring");
 const helper = require("../helper/helper");
+const { response } = require("../helper/helper");
+
+const getPrevLink = (page, currentQuery) => {
+  if (page > 1) {
+    const generatedPage = {
+      page: page - 1,
+    };
+    const resultPrevLink = {
+      ...currentQuery,
+      ...generatedPage,
+    };
+    return qs.stringify(resultPrevLink);
+  } else {
+    return null;
+  }
+};
+
+const getNextLink = (page, totalPage, currentQuery) => {
+  if (page < totalPage) {
+    const generatedPage = {
+      page: page + 1,
+    };
+    const resultNextLink = {
+      ...currentQuery,
+      ...generatedPage,
+    };
+    return qs.stringify(resultNextLink);
+  } else {
+    return null;
+  }
+};
 
 module.exports = {
-  getAllProduct: async (request, response) => {
+  getProduct: async (request, response) => {
+    let { page, limit, search, sort } = request.query;
+    page = parseInt(page);
+    limit = parseInt(limit);
+    let totalData = await getProductCount();
+    let totalPage = Math.ceil(totalData / limit);
+    let offset = page * limit - limit;
+    let prevLink = getPrevLink(page, request.query);
+    let nextLink = getNextLink(page, totalPage, request.query);
+    const pageInfo = {
+      page,
+      totalPage,
+      limit,
+      totalData,
+      prevLink: prevLink && `http://127.0.0.1:3000/product?${prevLink}`,
+      nextLink: nextLink && `http://127.0.0.1:3000/product?${nextLink}`,
+    };
     try {
-      const result = await getAllProduct();
-      return helper.response(response, 200, "Success Get Data Product", result);
+      const result = await getProduct(limit, offset, search, sort);
+      return helper.response(
+        response,
+        200,
+        "Success Get Data Product",
+        result,
+        pageInfo
+      );
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
     }
   },
   getProductById: async (request, response) => {
     try {
+      // console.log(request.params);
       const { id } = request.params;
       const result = await getProductById(id);
       if (result.length > 0) {
@@ -38,9 +94,20 @@ module.exports = {
   },
   getProductByName: async (request, response) => {
     try {
-      const { name } = request.params;
-      const result = await getProductByName(name);
-      console.log(result);
+      console.log(request.body);
+      const { keyword } = request.body;
+      console.log(keyword);
+      const result = await getProductByName(keyword);
+      if (result.length > 0) {
+        return helper.response(
+          response,
+          200,
+          `Success Get Data Product By Name`,
+          result
+        );
+      } else {
+        return helper.response(response, 404, "Data Product Not Found");
+      }
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
     }

@@ -83,7 +83,12 @@ module.exports = {
     try {
       const { id } = request.params;
       const result = await deleteCategory(id);
-      return helper.response(response, 200, `Data id: ${id} Deleted`, result);
+      return helper.response(
+        response,
+        200,
+        `Category id: ${id} Deleted`,
+        result
+      );
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
     }
