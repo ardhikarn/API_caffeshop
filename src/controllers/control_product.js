@@ -3,7 +3,6 @@ const {
   getProduct,
   getProductCount,
   getProductById,
-  getProductByName,
   postProduct,
   patchProduct,
   deleteProduct,
@@ -45,8 +44,14 @@ const getNextLink = (page, totalPage, currentQuery) => {
 module.exports = {
   getProduct: async (request, response) => {
     let { page, limit, search, sort } = request.query;
-    page = parseInt(page);
-    limit = parseInt(limit);
+    page === "" ? (page = 1) : (page = parseInt(page));
+    limit === "" ? (limit = 9) : (limit = parseInt(limit));
+    // if (search === "") {
+    //   search = ;
+    // }
+    if (sort === "") {
+      sort = "product_id";
+    }
     let totalData = await getProductCount();
     let totalPage = Math.ceil(totalData / limit);
     let offset = page * limit - limit;
@@ -75,7 +80,7 @@ module.exports = {
   },
   getProductById: async (request, response) => {
     try {
-      // console.log(request.params);
+      console.log(request.params);
       const { id } = request.params;
       const result = await getProductById(id);
       if (result.length > 0) {
@@ -92,40 +97,20 @@ module.exports = {
       return helper.response(response, 400, "Bad Request", error);
     }
   },
-  getProductByName: async (request, response) => {
-    try {
-      console.log(request.body);
-      const { keyword } = request.body;
-      console.log(keyword);
-      const result = await getProductByName(keyword);
-      if (result.length > 0) {
-        return helper.response(
-          response,
-          200,
-          `Success Get Data Product By Name`,
-          result
-        );
-      } else {
-        return helper.response(response, 404, "Data Product Not Found");
-      }
-    } catch (error) {
-      return helper.response(response, 400, "Bad Request", error);
-    }
-  },
   postProduct: async (request, response) => {
     try {
       const {
-        category_id,
         product_name,
         product_price,
         product_image,
+        category_id,
         product_status,
       } = request.body;
       const addData = {
-        category_id,
         product_name,
         product_price,
         product_image,
+        category_id,
         product_created_at: new Date(),
         product_status,
       };
@@ -139,17 +124,17 @@ module.exports = {
     try {
       const { id } = request.params;
       const {
-        category_id,
         product_name,
         product_price,
         product_image,
+        category_id,
         product_status,
       } = request.body;
       const updateData = {
-        category_id,
         product_name,
         product_price,
         product_image,
+        category_id,
         product_updated_at: new Date(),
         product_status,
       };
@@ -173,12 +158,7 @@ module.exports = {
     try {
       const { id } = request.params;
       const result = await deleteProduct(id);
-      return helper.response(
-        response,
-        200,
-        `Data id: ${id} Deleted`,
-        getAllProduct()
-      );
+      return helper.response(response, 200, `Data id: ${id} Deleted`, result);
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
     }

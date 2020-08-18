@@ -2,7 +2,6 @@ const router = require("express").Router();
 const {
   getProduct,
   getProductById,
-  getProductByName,
   postProduct,
   patchProduct,
   deleteProduct,
@@ -10,9 +9,7 @@ const {
 
 router.get("/", getProduct);
 
-router.get("/id/:id", getProductById);
-
-router.get("/name/:name", getProductByName);
+router.get("/:id", getProductById);
 
 router.post("/", postProduct);
 

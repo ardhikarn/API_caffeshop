@@ -1,17 +1,32 @@
+// Import connection from config
 const connection = require("../config/mysql");
 
 module.exports = {
-  getAllHistory: () => {
+  getAllHistory: (limit, offset, sort) => {
     return new Promise((resolve, reject) => {
-      connection.query("SELECT * FROM history", (error, result) => {
-        !error ? resolve(result) : reject(new Error(error));
-      });
+      connection.query(
+        `SELECT * FROM history ORDER BY ${sort} LIMIT ? OFFSET ?`,
+        [limit, offset],
+        (error, result) => {
+          !error ? resolve(result) : reject(new Error(error));
+        }
+      );
+    });
+  },
+  getHistoryCount: () => {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        "SELECT COUNT(*) as total FROM history",
+        (error, result) => {
+          !error ? resolve(result[0].total) : reject(new Error(error));
+        }
+      );
     });
   },
   getHistoryById: (id) => {
     return new Promise((resolve, reject) => {
       connection.query(
-        "SELECT * FROM history WHERE history_id = ?",
+        "SELECT * from history WHERE history_id = ?",
         id,
         (error, result) => {
           !error ? resolve(result) : reject(new Error(error));
@@ -19,58 +34,24 @@ module.exports = {
       );
     });
   },
-  postHistory: (addData) => {
+  postHistory: (setData) => {
     return new Promise((resolve, reject) => {
       connection.query(
         "INSERT INTO history SET ?",
-        addData,
+        setData,
         (error, result) => {
-          if (!error) {
-            const newResult = {
-              history_id: result.insertId,
-              ...addData,
-            };
-            resolve(newResult);
-          } else {
-            reject(new Error(error));
-          }
+          !error ? resolve(result) : reject(new Error(error));
         }
       );
     });
   },
-  patchHistory: (updateData, id) => {
+  patchHistory: (setData, id) => {
     return new Promise((resolve, reject) => {
       connection.query(
         "UPDATE history SET ? WHERE history_id = ?",
-        [updateData, id],
+        [setData, id],
         (error, result) => {
-          if (!error) {
-            const newResult = {
-              history_id: id,
-              ...updateData,
-            };
-            resolve(newResult);
-          } else {
-            reject(new Error(error));
-          }
-        }
-      );
-    });
-  },
-  deleteHistory: (id) => {
-    return new Promise((resolve, reject) => {
-      connection.query(
-        "DELETE FROM history WHERE history_id = ?",
-        id,
-        (error, result) => {
-          if (!error) {
-            const newResult = {
-              history_id: id,
-            };
-            resolve(newResult);
-          } else {
-            reject(new Error(error));
-          }
+          !error ? resolve(result) : reject(new Error(error));
         }
       );
     });

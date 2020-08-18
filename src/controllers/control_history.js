@@ -1,18 +1,85 @@
-const { request, response } = require("express");
+// Import object from model
 const {
   getAllHistory,
+  getHistoryCount,
   getHistoryById,
-  postHistory,
-  patchHistory,
-  deleteHistory,
+  // patchHistory,
 } = require("../models/model_history");
+const { getOrderByHistoryId } = require("../models/model_order");
+
+// Import query string
+const qs = require("querystring");
+
+// Import helper
 const helper = require("../helper/helper");
+const { request, response } = require("express");
+const { checkout } = require("../routes/route_order");
+
+// Pagination
+const getPrevLink = (page, currentQuery) => {
+  if (page > 1) {
+    const generatePage = {
+      page: page - 1,
+    };
+    const resultPrevLink = { ...currentQuery, ...generatePage };
+    return qs.stringify(resultPrevLink);
+  } else {
+    return null;
+  }
+};
+
+const getNextLink = (page, totalPage, currentQuery) => {
+  if (page < totalPage) {
+    const generatePage = {
+      page: page + 1,
+    };
+    const resultPrevLink = { ...currentQuery, ...generatePage };
+    return qs.stringify(resultPrevLink);
+  } else {
+    return null;
+  }
+};
 
 module.exports = {
   getAllHistory: async (request, response) => {
+    let { page, limit, sort } = request.query;
+    page === "" ? (page = 1) : (page = parseInt(page));
+    limit === "" ? (limit = 5) : (limit = parseInt(limit));
+    if (sort === "") {
+      sort = "history_id";
+    }
+    const totalData = await getHistoryCount();
+    const totalPage = Math.ceil(totalData / limit);
+    const offset = page * limit - limit;
+    const prevLink = getPrevLink(page, request.query);
+    const nextLink = getNextLink(page, totalPage, request.query);
+    const pageInfo = {
+      page,
+      totalPage,
+      limit,
+      totalData,
+      prevLink: prevLink && `http://127.0.0.1:3000/history?${prevLink}`,
+      nextLink: nextLink && `http://127.0.0.1:3000/history?${nextLink}`,
+    };
     try {
-      const result = await getAllHistory();
-      return helper.response(response, 200, "Success Get Data History", result);
+      const result = await getAllHistory(limit, offset, sort);
+      if (result.length > 0) {
+        return helper.response(
+          response,
+          200,
+          "Success Get History",
+          result,
+          pageInfo
+        );
+      } else {
+        return helper.response(
+          response,
+          404,
+          "History not found",
+          result,
+          pageInfo
+        );
+      }
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
     }
@@ -20,89 +87,52 @@ module.exports = {
   getHistoryById: async (request, response) => {
     try {
       const { id } = request.params;
-      const result = await getHistoryById(id);
-      if (result.length > 0) {
-        return helper.response(
-          response,
-          200,
-          `Success Get Data History with id ${id}`,
-          result
-        );
-      } else {
-        return helper.response(response, 404, "Data History Not Found");
-      }
-    } catch (error) {
-      return helper.response(response, 400, "Bad Request", error);
-    }
-  },
-  postHistory: async (request, response) => {
-    try {
-      const {
-        history_invoice,
-        order_id,
-        product_name,
-        order_qty,
-        order_total_price,
-        history_subtotal,
-      } = request.body;
-      const addData = {
-        history_invoice,
-        order_id,
-        product_name,
-        order_qty,
-        order_total_price,
-        history_subtotal,
-        category_created_at: new Date(),
+      const dataHistory = await getHistoryById(id);
+      const dataOrder = await getOrderByHistoryId(id);
+      let total = 0;
+      dataOrder.forEach((value) => {
+        total += value.order_total_price;
+      });
+      const ppn = (total * 10) / 100;
+      const result = {
+        history_id: dataHistory[0].history_id,
+        invoice: dataHistory[0].history_invoice,
+        orders: dataOrder,
+        ppn,
+        subtotal: dataHistory[0].history_subtotal,
+        history_created_at: dataHistory[0].history_created_at,
       };
-      const result = await postHistory(addData);
-      return helper.response(response, 200, "Category Created", result);
+      return helper.response(
+        response,
+        200,
+        `Get History id: ${id} Success`,
+        result
+      );
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
     }
   },
-  patchHistory: async (request, response) => {
-    try {
-      const { id } = request.params;
-      const {
-        history_invoice,
-        order_id,
-        product_name,
-        order_qty,
-        order_total_price,
-        history_subtotal,
-      } = request.body;
-      const updateData = {
-        history_invoice,
-        order_id,
-        product_name,
-        order_qty,
-        order_total_price,
-        history_subtotal,
-        category_updated_at: new Date(),
-      };
-      const checkId = await getHistoryById(id);
-      if (checkId.length > 0) {
-        const result = await patchHistory(updateData, id);
-        return helper.response(
-          response,
-          200,
-          `History id: ${id} Updated`,
-          result
-        );
-      } else {
-        return helper.response(response, 404, `History id: ${id} not Found`);
-      }
-    } catch (error) {
-      return helper.response(response, 400, "Bad Request", error);
-    }
-  },
-  deleteHistory: async (request, response) => {
-    try {
-      const { id } = request.params;
-      const result = await deleteHistory(id);
-      return helper.response(response, 200, `Data id: ${id} Deleted`, result);
-    } catch (error) {
-      return helper.response(response, 400, "Bad Request", error);
-    }
-  },
+  // patchHistory: async (request, response) => {
+  //   try {
+  //     const { id } = request.params;
+  //     const updateData = {
+  //       history_subtotal: ,
+  //     };
+  //     console.log(updateData);
+  //     const checkId = await getHistoryById(id);
+  //     if (checkId.length > 0) {
+  //       const result = await patchHistory(updateData);
+  //       return helper.response(
+  //         response,
+  //         200,
+  //         `History id: ${id} Updated`,
+  //         result
+  //       );
+  //     } else {
+  //       return helper.response(response, 404, `History id: ${id} not Found`);
+  //     }
+  //   } catch (error) {
+  //     return helper.response(response, 400, "Bad Request", error);
+  //   }
+  // },
 };

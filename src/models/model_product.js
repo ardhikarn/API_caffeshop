@@ -26,25 +26,9 @@ module.exports = {
   getProductById: (id) => {
     return new Promise((resolve, reject) => {
       connection.query(
-        `SELECT product.product_id, product.product_name, product.product_image, 
-            product.product_price, product.category_id, category.category_name, product.product_created_at, product.product_updated_at, 
-            product.product_status FROM product INNER JOIN category ON product.category_id = category.category_id 
-            WHERE product_id = ?`,
-        id,
-        (error, result) => {
-          !error ? resolve(result) : reject(new Error(error));
-        }
-      );
-    });
-  },
-  getProductByName: (name) => {
-    return new Promise((resolve, reject) => {
-      connection.query(
-        `SELECT product.product_id, product.product_name, product.product_image, 
-            product.product_price, product.category_id, category.category_name, product.product_created_at, product.product_updated_at, 
-            product.product_status FROM product INNER JOIN category ON product.category_id = category.category_id 
-            WHERE product_name = ?`,
-        `%${name}%`,
+        `SELECT product.product_id, product.product_name, product.product_image, product.product_price, 
+        category.category_name, product.product_created_at, product.product_updated_at, product.product_status FROM product 
+        INNER JOIN category ON product.category_id = category.category_id WHERE product_id = ${id}`,
         (error, result) => {
           !error ? resolve(result) : reject(new Error(error));
         }
@@ -57,6 +41,7 @@ module.exports = {
         "INSERT INTO product SET ?",
         addData,
         (error, result) => {
+          // console.log(result);
           if (!error) {
             const newResult = {
               product_id: result.insertId,
