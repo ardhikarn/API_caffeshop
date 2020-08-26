@@ -42,10 +42,12 @@ const getNextLink = (page, totalPage, currentQuery) => {
 module.exports = {
   getAllOrder: async (request, response) => {
     let { page, limit, sort } = request.query;
-    page === "" ? (page = 1) : (page = parseInt(page));
-    limit === "" ? (limit = 5) : (limit = parseInt(limit));
+    page === "" || page === undefined ? (page = 1) : (page = parseInt(page));
+    limit === "" || limit === undefined
+      ? (limit = 5)
+      : (limit = parseInt(limit));
     const totalData = await getOrderCount();
-    if (sort === "") {
+    if (sort === "" || sort === undefined) {
       sort = "order_id";
     }
     const totalPage = Math.ceil(totalData / limit);
@@ -108,6 +110,7 @@ module.exports = {
   },
   postOrder: async (request, response) => {
     try {
+      // menentukan random invoice
       const history_invoice = Math.floor(100000 + Math.random() * 900000);
       const setData = {
         history_invoice,
@@ -116,12 +119,16 @@ module.exports = {
       };
       const result = await postHistory(setData);
       // console.log(result);
+      // mendapatkan history_id
       const historyId = result.insertId;
+      // utk mengambil data di raw postman
       const orders = request.body.orders;
       let subTotal = 0;
       for (let i = 0; i < orders.length; i++) {
         const product_id = orders[i].product_id;
         const order_qty = orders[i].order_qty;
+
+        // mengambil product price
         const getProduct = await getProductById(product_id);
         const productPrice = getProduct[0].product_price;
         const setDataOrder = {
@@ -150,7 +157,7 @@ module.exports = {
         subtotal: dataHistory[0].history_subtotal,
         history_created_at: dataHistory[0].history_created_at,
       };
-      return helper.response(response, 200, "Order Added", printOrder);
+      return helper.response(response, 200, "Order Created", printOrder);
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
     }

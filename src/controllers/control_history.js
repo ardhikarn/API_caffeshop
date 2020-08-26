@@ -53,6 +53,7 @@ module.exports = {
     const offset = page * limit - limit;
     const prevLink = getPrevLink(page, request.query);
     const nextLink = getNextLink(page, totalPage, request.query);
+
     const pageInfo = {
       page,
       totalPage,
@@ -63,6 +64,7 @@ module.exports = {
     };
     try {
       const result = await getAllHistory(limit, offset, sort);
+      console.log(result);
       if (result.length > 0) {
         return helper.response(
           response,
@@ -93,12 +95,10 @@ module.exports = {
       dataOrder.forEach((value) => {
         total += value.order_total_price;
       });
-      const ppn = (total * 10) / 100;
       const result = {
         history_id: dataHistory[0].history_id,
         invoice: dataHistory[0].history_invoice,
         orders: dataOrder,
-        ppn,
         subtotal: dataHistory[0].history_subtotal,
         history_created_at: dataHistory[0].history_created_at,
       };

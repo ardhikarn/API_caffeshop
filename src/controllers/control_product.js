@@ -44,12 +44,14 @@ const getNextLink = (page, totalPage, currentQuery) => {
 module.exports = {
   getProduct: async (request, response) => {
     let { page, limit, search, sort } = request.query;
-    page === "" ? (page = 1) : (page = parseInt(page));
-    limit === "" ? (limit = 9) : (limit = parseInt(limit));
-    // if (search === "") {
-    //   search = ;
-    // }
-    if (sort === "") {
+    page === "" || page === undefined ? (page = 1) : (page = parseInt(page));
+    limit === "" || limit === undefined
+      ? (limit = 5)
+      : (limit = parseInt(limit));
+    if (search === "" || search === undefined) {
+      search = "";
+    }
+    if (sort === "" || sort === undefined) {
       sort = "product_id";
     }
     let totalData = await getProductCount();
@@ -80,7 +82,7 @@ module.exports = {
   },
   getProductById: async (request, response) => {
     try {
-      console.log(request.params);
+      // console.log(request.params);
       const { id } = request.params;
       const result = await getProductById(id);
       if (result.length > 0) {
@@ -158,7 +160,7 @@ module.exports = {
     try {
       const { id } = request.params;
       const result = await deleteProduct(id);
-      return helper.response(response, 200, `Data id: ${id} Deleted`, result);
+      return helper.response(response, 200, `Data id: ${id} Deleted`);
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
     }
