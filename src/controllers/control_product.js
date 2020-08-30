@@ -43,7 +43,7 @@ const getNextLink = (page, totalPage, currentQuery) => {
 
 module.exports = {
   getProduct: async (request, response) => {
-    let { page, limit, search, sort } = request.query;
+    let { page, limit, search, sort, ascDesc } = request.query;
     page === "" || page === undefined ? (page = 1) : (page = parseInt(page));
     limit === "" || limit === undefined
       ? (limit = 5)
@@ -53,6 +53,9 @@ module.exports = {
     }
     if (sort === "" || sort === undefined) {
       sort = "product_id";
+    }
+    if (ascDesc === "" || ascDesc === undefined) {
+      ascDesc = "ASC";
     }
     let totalData = await getProductCount();
     let totalPage = Math.ceil(totalData / limit);
@@ -68,7 +71,7 @@ module.exports = {
       nextLink: nextLink && `http://127.0.0.1:3000/product?${nextLink}`,
     };
     try {
-      const result = await getProduct(limit, offset, search, sort);
+      const result = await getProduct(limit, offset, search, sort, ascDesc);
       return helper.response(
         response,
         200,

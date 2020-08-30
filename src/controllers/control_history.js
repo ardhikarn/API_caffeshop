@@ -3,6 +3,10 @@ const {
   getAllHistory,
   getHistoryCount,
   getHistoryById,
+  getHistoryToday,
+  getHistoryMonth,
+  getHistoryWeek,
+  getHistoryTotalIncome,
   // patchHistory,
 } = require("../models/model_history");
 const { getOrderByHistoryId } = require("../models/model_order");
@@ -43,9 +47,11 @@ const getNextLink = (page, totalPage, currentQuery) => {
 module.exports = {
   getAllHistory: async (request, response) => {
     let { page, limit, sort } = request.query;
-    page === "" ? (page = 1) : (page = parseInt(page));
-    limit === "" ? (limit = 5) : (limit = parseInt(limit));
-    if (sort === "") {
+    page === "" || page === undefined ? (page = 1) : (page = parseInt(page));
+    limit === "" || limit === undefined
+      ? (limit = 5)
+      : (limit = parseInt(limit));
+    if (sort === "" || sort === undefined) {
       sort = "history_id";
     }
     const totalData = await getHistoryCount();
@@ -64,24 +70,25 @@ module.exports = {
     };
     try {
       const result = await getAllHistory(limit, offset, sort);
-      console.log(result);
-      if (result.length > 0) {
-        return helper.response(
-          response,
-          200,
-          "Success Get History",
-          result,
-          pageInfo
-        );
-      } else {
-        return helper.response(
-          response,
-          404,
-          "History not found",
-          result,
-          pageInfo
-        );
+      // untuk menampilkan orders
+      for (let i = 0; i < result.length; i++) {
+        result[i].orders = await getOrderByHistoryId(result[i].history_id);
+        let total = 0;
+        result[i].orders.forEach((value) => {
+          total += value.order_total_price;
+        });
+        result[i].allTotalPriceOrder = total;
+        const ppn = (total * 10) / 100;
+        result[i].ppn = ppn;
       }
+      console.log(result);
+      return helper.response(
+        response,
+        200,
+        "Success Get History",
+        result,
+        pageInfo
+      );
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
     }
@@ -112,27 +119,67 @@ module.exports = {
       return helper.response(response, 400, "Bad Request", error);
     }
   },
-  // patchHistory: async (request, response) => {
-  //   try {
-  //     const { id } = request.params;
-  //     const updateData = {
-  //       history_subtotal: ,
-  //     };
-  //     console.log(updateData);
-  //     const checkId = await getHistoryById(id);
-  //     if (checkId.length > 0) {
-  //       const result = await patchHistory(updateData);
-  //       return helper.response(
-  //         response,
-  //         200,
-  //         `History id: ${id} Updated`,
-  //         result
-  //       );
-  //     } else {
-  //       return helper.response(response, 404, `History id: ${id} not Found`);
-  //     }
-  //   } catch (error) {
-  //     return helper.response(response, 400, "Bad Request", error);
-  //   }
-  // },
+  getHistoryToday: async (request, response) => {
+    try {
+      const result = await getHistoryToday();
+      for (let i = 0; i < result.length; i++) {
+        result[i].orders = await getOrderByHistoryId(result[i].history_id);
+        let total = 0;
+        result[i].orders.forEach((value) => {
+          total += value.order_total_price;
+        });
+        result[i].allTotalPriceOrder = total;
+        const ppn = (total * 10) / 100;
+        result[i].ppn = ppn;
+      }
+      return helper.response(response, 200, "Success Get History", result);
+    } catch (error) {
+      return helper.response(response, 400, "Bad Request", error);
+    }
+  },
+  getHistoryMonth: async (request, response) => {
+    try {
+      const result = await getHistoryMonth();
+      for (let i = 0; i < result.length; i++) {
+        result[i].orders = await getOrderByHistoryId(result[i].history_id);
+        let total = 0;
+        result[i].orders.forEach((value) => {
+          total += value.order_total_price;
+        });
+        result[i].allTotalPriceOrder = total;
+        const ppn = total * 0.1;
+        result[i].ppn = ppn;
+      }
+      return helper.response(response, 200, "Success Get History", result);
+    } catch (error) {
+      return helper.response(response, 400, "Bad Request", error);
+    }
+  },
+  getHistoryWeek: async (request, response) => {
+    try {
+      const result = await getHistoryWeek();
+      for (let i = 0; i < result.length; i++) {
+        result[i].orders = await getOrderByHistoryId(result[i].history_id);
+        let total = 0;
+        result[i].orders.forEach((value) => {
+          total += value.order_total_price;
+        });
+        result[i].allTotalPriceOrder = total;
+        const ppn = total * 0.1;
+        result[i].ppn = ppn;
+      }
+      return helper.response(response, 200, "Success Get History", result);
+    } catch (error) {
+      return helper.response(response, 400, "Bad Request", error);
+    }
+  },
+  getHistoryTotalIncome: async (request, response) => {
+    try {
+      const { date } = request.query;
+      const result = await getHistoryTotalIncome(date);
+      return helper.response(response, 200, "Success Get Total Income", result);
+    } catch (error) {
+      return helper.response(response, 400, "Bad Request", error);
+    }
+  },
 };

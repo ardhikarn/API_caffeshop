@@ -122,7 +122,7 @@ module.exports = {
       // mendapatkan history_id
       const historyId = result.insertId;
       // utk mengambil data di raw postman
-      const orders = request.body.orders;
+      const orders = request.body;
       let subTotal = 0;
       for (let i = 0; i < orders.length; i++) {
         const product_id = orders[i].product_id;

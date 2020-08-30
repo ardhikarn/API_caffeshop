@@ -13,12 +13,52 @@ module.exports = {
       );
     });
   },
+  getHistoryToday: () => {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        "SELECT * FROM history WHERE DAY(history_created_at) = DAY(NOW()) AND MONTH(history_created_at) = MONTH(NOW()) AND YEAR(history_created_at) = YEAR(NOW())",
+        (error, result) => {
+          !error ? resolve(result) : reject(new Error(error));
+        }
+      );
+    });
+  },
+  getHistoryMonth: () => {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        "SELECT * FROM history WHERE MONTH(history_created_at) = MONTH(NOW()) AND YEAR(history_created_at) = YEAR(NOW())",
+        (error, result) => {
+          !error ? resolve(result) : reject(new Error(error));
+        }
+      );
+    });
+  },
+  getHistoryWeek: () => {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        "SELECT * FROM history WHERE WEEK(history_created_at) = WEEK(NOW()) AND YEAR(history_created_at) = YEAR(NOW())",
+        (error, result) => {
+          !error ? resolve(result) : reject(new Error(error));
+        }
+      );
+    });
+  },
   getHistoryCount: () => {
     return new Promise((resolve, reject) => {
       connection.query(
         "SELECT COUNT(*) as total FROM history",
         (error, result) => {
           !error ? resolve(result[0].total) : reject(new Error(error));
+        }
+      );
+    });
+  },
+  getHistoryTotalIncome: (date) => {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        `SELECT SUM(history_subtotal) AS total_income FROM history WHERE history_created_at LIKE '%${date}%'`,
+        (error, result) => {
+          !error ? resolve(result) : reject(new Error(error));
         }
       );
     });
