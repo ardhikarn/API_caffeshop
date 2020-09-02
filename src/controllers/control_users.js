@@ -9,7 +9,6 @@ module.exports = {
     // utk merubah password agar di enkripsi
     const salt = bcrypt.genSaltSync(10);
     const encryptPassword = bcrypt.hashSync(user_password, salt);
-    // kondisi jika email sama tidak bisa
     const addData = {
       user_email,
       user_password: encryptPassword,
@@ -18,9 +17,11 @@ module.exports = {
       user_status: 0,
       user_created_at: new Date(),
     };
+    // console.log(user_email);
     try {
       // kondisi jika email sama tidak bisa
-      if (addData.user_email === result.user_email) {
+      const checkEmail = await checkUser(user_email);
+      if (checkEmail.length >= 1) {
         return helper.response(response, 400, "Email Already Used");
       } else {
         const result = await postUser(addData);
@@ -35,7 +36,6 @@ module.exports = {
       const { user_email, user_password } = request.body;
       const checkDataUser = await checkUser(user_email);
       if (checkDataUser.length >= 1) {
-        // console.log(true);
         const checkPassword = bcrypt.compareSync(
           // proses cek password
           user_password,
