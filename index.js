@@ -11,6 +11,7 @@ app.use(cors());
 app.use(bodyParser.json()); //utk row
 app.use(bodyParser.urlencoded({ extended: false })); //utk urlencoded
 app.use(morgan("dev"));
+app.use(express.static("uploads"));
 app.use((request, response, next) => {
   response.header("Access-Control-Allow-Origin", "*");
   response.header(
