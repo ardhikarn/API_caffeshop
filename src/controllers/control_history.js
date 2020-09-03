@@ -6,7 +6,10 @@ const {
   getHistoryToday,
   getHistoryMonth,
   getHistoryWeek,
-  getHistoryTotalIncome,
+  getHistoryTodayIncome,
+  getCountHistoryWeek,
+  getHistoryYearIncome,
+  getHistoryChartThisMonth,
   // patchHistory,
 } = require("../models/model_history");
 const { getOrderByHistoryId } = require("../models/model_order");
@@ -132,7 +135,12 @@ module.exports = {
         const ppn = (total * 10) / 100;
         result[i].ppn = ppn;
       }
-      return helper.response(response, 200, "Success Get History", result);
+      return helper.response(
+        response,
+        200,
+        "Success Get History Orders Today",
+        result
+      );
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
     }
@@ -150,7 +158,12 @@ module.exports = {
         const ppn = total * 0.1;
         result[i].ppn = ppn;
       }
-      return helper.response(response, 200, "Success Get History", result);
+      return helper.response(
+        response,
+        200,
+        "Success Get History Orders Month",
+        result
+      );
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
     }
@@ -168,16 +181,59 @@ module.exports = {
         const ppn = total * 0.1;
         result[i].ppn = ppn;
       }
-      return helper.response(response, 200, "Success Get History", result);
+      return helper.response(
+        response,
+        200,
+        "Success Get History Orders Week",
+        result
+      );
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
     }
   },
-  getHistoryTotalIncome: async (request, response) => {
+  getHistoryTodayIncome: async (request, response) => {
     try {
-      const { date } = request.query;
-      const result = await getHistoryTotalIncome(date);
+      const result = await getHistoryTodayIncome();
       return helper.response(response, 200, "Success Get Total Income", result);
+    } catch (error) {
+      return helper.response(response, 400, "Bad Request", error);
+    }
+  },
+  getCountHistoryWeek: async (request, response) => {
+    try {
+      const result = await getCountHistoryWeek();
+      return helper.response(
+        response,
+        200,
+        "Success Count Week Orders",
+        result
+      );
+    } catch (error) {
+      return helper.response(response, 400, "Bad Request", error);
+    }
+  },
+  getHistoryYearIncome: async (request, response) => {
+    try {
+      const result = await getHistoryYearIncome();
+      return helper.response(
+        response,
+        200,
+        "Success Get Total Year Income",
+        result
+      );
+    } catch (error) {
+      return helper.response(response, 400, "Bad Request", error);
+    }
+  },
+  getHistoryChartThisMonth: async (request, response) => {
+    try {
+      const result = await getHistoryChartThisMonth();
+      return helper.response(
+        response,
+        200,
+        "Success Get Data Chart This Month",
+        result
+      );
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
     }
