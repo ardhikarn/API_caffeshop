@@ -8,34 +8,13 @@ const {
 } = require("../controllers/control_product");
 const { authorization, authorizationAdmin } = require("../middleware/auth");
 const {
+  getProductRedis,
   getProductByIdRedis,
-  clearDataProductRedist,
+  clearDataRedist,
 } = require("../middleware/redis");
-const multer = require("multer");
+const upload = require("../middleware/multer");
 
-const storage = multer.diskStorage({
-  destination: (request, file, callback) => {
-    callback(null, "./uploads/");
-  },
-  filename: (request, file, callback) => {
-    callback(
-      null,
-      new Date().toISOString().replace(/:/g, "-") + "-" + file.originalname
-    );
-  },
-});
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 60000 },
-  fileFilter: (req, file, callback) => {
-    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-      return callback(new Error("Only image files are allowed!"));
-    }
-    callback(null, true);
-  },
-});
-
-router.get("/", authorization, getProduct);
+router.get("/", authorization, getProductRedis, getProduct);
 router.get("/:id", authorization, getProductByIdRedis, getProductById);
 
 router.post(
@@ -45,13 +24,14 @@ router.post(
   postProduct
 );
 
-router.patch("/:id", authorizationAdmin, clearDataProductRedist, patchProduct);
-
-router.delete(
+router.patch(
   "/:id",
   authorizationAdmin,
-  clearDataProductRedist,
-  deleteProduct
+  upload.single("product_image"),
+  clearDataRedist,
+  patchProduct
 );
+
+router.delete("/:id", authorizationAdmin, clearDataRedist, deleteProduct);
 
 module.exports = router;
