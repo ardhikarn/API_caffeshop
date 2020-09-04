@@ -57,9 +57,17 @@ module.exports = {
             user_role,
             user_status,
           };
-          const token = jwt.sign(payload, "RAHASIA", { expiresIn: "12h" });
-          payload = { ...payload, token };
-          return helper.response(response, 200, "Success Login!", payload);
+          if (payload.user_status === 0) {
+            return helper.response(
+              response,
+              400,
+              "Your account is not activate, contact admin for help"
+            );
+          } else {
+            const token = jwt.sign(payload, "RAHASIA", { expiresIn: "24h" });
+            payload = { ...payload, token };
+            return helper.response(response, 200, "Success Login!", payload);
+          }
         } else {
           return helper.response(response, 400, "Wrong Password !");
         }
