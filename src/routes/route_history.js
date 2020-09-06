@@ -10,15 +10,47 @@ const {
   getHistoryYearIncome,
   getHistoryChartThisMonth,
 } = require("../controllers/control_history");
+const { authorizationAdmin } = require("../middleware/auth");
+const {
+  getHistoryRedis,
+  getHistoryIdRedis,
+  getHistoryTodayRedis,
+  getHistoryWeekRedis,
+  getHistoryMonthRedis,
+  getHistoryTodayIncomeRedis,
+  getHistoryCountWeekRedis,
+  getHistoryYearIncomeRedis,
+  getHistoryChartMonth,
+} = require("../middleware/redis");
 
-router.get("/", getAllHistory);
-router.get("/id/:id", getHistoryById);
-router.get("/today", getHistoryToday);
-router.get("/month", getHistoryMonth);
-router.get("/week", getHistoryWeek);
-router.get("/todayincome", getHistoryTodayIncome);
-router.get("/countWeek", getCountHistoryWeek);
-router.get("/yearsIncome", getHistoryYearIncome);
-router.get("/chartThisMonth", getHistoryChartThisMonth);
+router.get("/", authorizationAdmin, getHistoryRedis, getAllHistory);
+router.get("/id/:id", authorizationAdmin, getHistoryIdRedis, getHistoryById);
+router.get("/today", authorizationAdmin, getHistoryTodayRedis, getHistoryToday);
+router.get("/week", authorizationAdmin, getHistoryWeekRedis, getHistoryWeek);
+router.get("/month", authorizationAdmin, getHistoryMonthRedis, getHistoryMonth);
+router.get(
+  "/todayincome",
+  authorizationAdmin,
+  getHistoryTodayIncomeRedis,
+  getHistoryTodayIncome
+);
+router.get(
+  "/countWeek",
+  authorizationAdmin,
+  getHistoryCountWeekRedis,
+  getCountHistoryWeek
+);
+router.get(
+  "/yearsIncome",
+  authorizationAdmin,
+  getHistoryYearIncomeRedis,
+  getHistoryYearIncome
+);
+router.get(
+  "/chartThisMonth",
+  authorizationAdmin,
+  getHistoryChartMonth,
+  getHistoryChartThisMonth
+);
 
 module.exports = router;

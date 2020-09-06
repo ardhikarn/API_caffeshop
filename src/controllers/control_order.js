@@ -13,6 +13,8 @@ const {
 const { getProductById } = require("../models/model_product");
 const qs = require("querystring");
 const helper = require("../helper/helper");
+const redis = require("redis");
+const client = redis.createClient();
 
 // Pagination
 const getPrevLink = (page, currentQuery) => {
@@ -65,6 +67,15 @@ module.exports = {
     try {
       const result = await getAllOrder(sort, limit, offset);
       if (result.length > 0) {
+        const newResult = {
+          result,
+          pageInfo,
+        };
+        client.setex(
+          `getOrder:${JSON.stringify(request.query)}`,
+          3600,
+          JSON.stringify(newResult)
+        );
         return helper.response(
           response,
           200,
@@ -90,6 +101,7 @@ module.exports = {
       const { id } = request.params;
       const result = await getOrderById(id);
       if (result.length > 0) {
+        client.setex(`getOrderId:${id}`, 3600, JSON.stringify(result));
         return helper.response(
           response,
           200,

@@ -10,9 +10,9 @@ const { authorization, authorizationAdmin } = require("../middleware/auth");
 const {
   getProductRedis,
   getProductByIdRedis,
-  clearDataRedist,
+  clearProductRedis,
 } = require("../middleware/redis");
-const upload = require("../middleware/multer");
+const uploadFilter = require("../middleware/multer");
 
 router.get("/", authorization, getProductRedis, getProduct);
 router.get("/:id", authorization, getProductByIdRedis, getProductById);
@@ -20,18 +20,19 @@ router.get("/:id", authorization, getProductByIdRedis, getProductById);
 router.post(
   "/",
   authorizationAdmin,
-  upload.single("product_image"),
+  uploadFilter,
+  clearProductRedis,
   postProduct
 );
 
 router.patch(
   "/:id",
   authorizationAdmin,
-  upload.single("product_image"),
-  clearDataRedist,
+  uploadFilter,
+  clearProductRedis,
   patchProduct
 );
 
-router.delete("/:id", authorizationAdmin, clearDataRedist, deleteProduct);
+router.delete("/:id", authorizationAdmin, clearProductRedis, deleteProduct);
 
 module.exports = router;

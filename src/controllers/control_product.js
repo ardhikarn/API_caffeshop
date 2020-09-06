@@ -74,10 +74,14 @@ module.exports = {
     try {
       const result = await getProduct(limit, offset, search, sort, ascDesc);
       // proses set data result ke dalam redis
+      const newResult = {
+        result,
+        pageInfo,
+      };
       client.setex(
-        `getproduct:${JSON.stringify(request.query)}`,
+        `getProduct:${JSON.stringify(request.query)}`,
         3600,
-        JSON.stringify(result)
+        JSON.stringify(newResult)
       );
       return helper.response(
         response,
@@ -96,7 +100,7 @@ module.exports = {
       const { id } = request.params;
       const result = await getProductById(id);
       if (result.length > 0) {
-        client.setex(`getproductbyid:${id}`, 3600, JSON.stringify(result));
+        client.setex(`getProductById:${id}`, 3600, JSON.stringify(result));
         return helper.response(
           response,
           200,

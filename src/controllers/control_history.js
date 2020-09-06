@@ -1,4 +1,3 @@
-// Import object from model
 const {
   getAllHistory,
   getHistoryCount,
@@ -10,17 +9,12 @@ const {
   getCountHistoryWeek,
   getHistoryYearIncome,
   getHistoryChartThisMonth,
-  // patchHistory,
 } = require("../models/model_history");
 const { getOrderByHistoryId } = require("../models/model_order");
-
-// Import query string
 const qs = require("querystring");
-
-// Import helper
 const helper = require("../helper/helper");
-const { request, response } = require("express");
-const { checkout } = require("../routes/route_order");
+const redis = require("redis");
+const client = redis.createClient();
 
 // Pagination
 const getPrevLink = (page, currentQuery) => {
@@ -84,7 +78,15 @@ module.exports = {
         const ppn = (total * 10) / 100;
         result[i].ppn = ppn;
       }
-      console.log(result);
+      const newResult = {
+        result,
+        pageInfo,
+      };
+      client.setex(
+        `getHistory:${JSON.stringify(request.query)}`,
+        3600,
+        JSON.stringify(newResult)
+      );
       return helper.response(
         response,
         200,
@@ -112,6 +114,7 @@ module.exports = {
         subtotal: dataHistory[0].history_subtotal,
         history_created_at: dataHistory[0].history_created_at,
       };
+      client.setex(`getHistoryId:${id}`, 3600, JSON.stringify(result));
       return helper.response(
         response,
         200,
@@ -135,10 +138,36 @@ module.exports = {
         const ppn = (total * 10) / 100;
         result[i].ppn = ppn;
       }
+      client.setex("getHistoryToday", 3600, JSON.stringify(result));
       return helper.response(
         response,
         200,
         "Success Get History Orders Today",
+        result
+      );
+    } catch (error) {
+      return helper.response(response, 400, "Bad Request", error);
+    }
+  },
+
+  getHistoryWeek: async (request, response) => {
+    try {
+      const result = await getHistoryWeek();
+      for (let i = 0; i < result.length; i++) {
+        result[i].orders = await getOrderByHistoryId(result[i].history_id);
+        let total = 0;
+        result[i].orders.forEach((value) => {
+          total += value.order_total_price;
+        });
+        result[i].allTotalPriceOrder = total;
+        const ppn = total * 0.1;
+        result[i].ppn = ppn;
+      }
+      client.setex("getHistoryWeek", 3600, JSON.stringify(result));
+      return helper.response(
+        response,
+        200,
+        "Success Get History Orders Week",
         result
       );
     } catch (error) {
@@ -158,6 +187,7 @@ module.exports = {
         const ppn = total * 0.1;
         result[i].ppn = ppn;
       }
+      client.setex("getHistoryMonth", 3600, JSON.stringify(result));
       return helper.response(
         response,
         200,
@@ -168,32 +198,10 @@ module.exports = {
       return helper.response(response, 400, "Bad Request", error);
     }
   },
-  getHistoryWeek: async (request, response) => {
-    try {
-      const result = await getHistoryWeek();
-      for (let i = 0; i < result.length; i++) {
-        result[i].orders = await getOrderByHistoryId(result[i].history_id);
-        let total = 0;
-        result[i].orders.forEach((value) => {
-          total += value.order_total_price;
-        });
-        result[i].allTotalPriceOrder = total;
-        const ppn = total * 0.1;
-        result[i].ppn = ppn;
-      }
-      return helper.response(
-        response,
-        200,
-        "Success Get History Orders Week",
-        result
-      );
-    } catch (error) {
-      return helper.response(response, 400, "Bad Request", error);
-    }
-  },
   getHistoryTodayIncome: async (request, response) => {
     try {
       const result = await getHistoryTodayIncome();
+      client.setex("getHistoryTodayIncome", 3600, JSON.stringify(result));
       return helper.response(response, 200, "Success Get Total Income", result);
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
@@ -202,6 +210,7 @@ module.exports = {
   getCountHistoryWeek: async (request, response) => {
     try {
       const result = await getCountHistoryWeek();
+      client.setex("getHistoryCountWeek", 3600, JSON.stringify(result));
       return helper.response(
         response,
         200,
@@ -215,6 +224,7 @@ module.exports = {
   getHistoryYearIncome: async (request, response) => {
     try {
       const result = await getHistoryYearIncome();
+      client.setex("getHistoryYearIncome", 3600, JSON.stringify(result));
       return helper.response(
         response,
         200,
@@ -228,6 +238,7 @@ module.exports = {
   getHistoryChartThisMonth: async (request, response) => {
     try {
       const result = await getHistoryChartThisMonth();
+      client.setex("getHistoryChartMonth", 3600, JSON.stringify(result));
       return helper.response(
         response,
         200,

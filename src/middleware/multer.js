@@ -1,4 +1,5 @@
 const multer = require("multer");
+const helper = require("../helper/helper");
 
 const storage = multer.diskStorage({
   destination: (request, file, callback) => {
@@ -12,14 +13,27 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({
-  storage: storage,
+  storage,
   limits: { fileSize: 100000 },
-  fileFilter: (req, file, callback) => {
+  fileFilter: (request, file, callback) => {
     if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-      return callback(new Error("Only image files are allowed!"));
+      return callback(
+        new Error("Only image files are allowed! (jpg/jpeg/png)", false)
+      );
     }
     callback(null, true);
   },
-});
+}).single("product_image");
 
-module.exports = upload;
+const uploadFilter = (request, response, next) => {
+  upload(request, response, (error) => {
+    if (error instanceof multer.MulterError) {
+      return helper.response(response, 400, error.message);
+    } else if (error) {
+      return helper.response(response, 400, error.message);
+    }
+    next();
+  });
+};
+
+module.exports = uploadFilter;

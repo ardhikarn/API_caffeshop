@@ -7,11 +7,14 @@ const {
   deleteCategory,
 } = require("../models/model_category");
 const helper = require("../helper/helper");
+const redis = require("redis");
+const client = redis.createClient();
 
 module.exports = {
   getAllCategory: async (request, response) => {
     try {
       const result = await getAllCategory();
+      client.setex("getCategory", 3600, JSON.stringify(result));
       return helper.response(
         response,
         200,
@@ -27,6 +30,7 @@ module.exports = {
       const { id } = request.params;
       const result = await getCategoryById(id);
       if (result.length > 0) {
+        client.setex(`getCategoryId:${id}`, 3600, JSON.stringify(result));
         return helper.response(
           response,
           200,
