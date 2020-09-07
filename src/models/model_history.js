@@ -1,4 +1,3 @@
-// Import connection from config
 const connection = require("../config/mysql");
 
 module.exports = {

@@ -1,7 +1,6 @@
 const redis = require("redis");
 const client = redis.createClient();
 const helper = require("../helper/helper");
-const { request, response } = require("express");
 
 module.exports = {
   // =============== REDIS PRODUCT ==================
@@ -127,7 +126,6 @@ module.exports = {
       `getHistory:${JSON.stringify(request.query)}`,
       (error, result) => {
         if (!error && result != null) {
-          // console.log("data ada di redis");
           return helper.response(
             response,
             200,
@@ -135,7 +133,6 @@ module.exports = {
             JSON.parse(result)
           );
         }
-        // console.log("data tidak ada di redis");
         next();
       }
     );

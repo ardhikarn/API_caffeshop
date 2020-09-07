@@ -96,7 +96,6 @@ module.exports = {
   },
   getProductById: async (request, response) => {
     try {
-      // console.log(request.params);
       const { id } = request.params;
       const result = await getProductById(id);
       if (result.length > 0) {

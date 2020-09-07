@@ -130,7 +130,6 @@ module.exports = {
         history_created_at: new Date(),
       };
       const result = await postHistory(setData);
-      // console.log(result);
       // mendapatkan history_id
       const historyId = result.insertId;
       // utk mengambil data di raw postman
@@ -160,7 +159,6 @@ module.exports = {
       await patchHistory(setData3, historyId);
       const dataHistory = await getHistoryById(historyId);
       const dataOrders = await getOrderByHistoryId(historyId);
-      // console.log(dataOrders);
       const printOrder = {
         history_id: dataHistory[0].history_id,
         invoice: dataHistory[0].history_invoice,

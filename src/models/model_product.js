@@ -1,4 +1,3 @@
-// butuh connection dari mysql jadi harus import dari config
 const connection = require("../config/mysql");
 
 module.exports = {
@@ -41,7 +40,6 @@ module.exports = {
         "INSERT INTO product SET ?",
         addData,
         (error, result) => {
-          // console.log(result);
           if (!error) {
             const newResult = {
               product_id: result.insertId,

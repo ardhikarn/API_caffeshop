@@ -4,7 +4,7 @@ module.exports = {
   getUser: (limit, offset, search, sort, ascDesc) => {
     return new Promise((resolve, reject) => {
       connection.query(
-        `SELECT * FROM user WHERE user_name LIKE "%${search}%" ORDER BY ${sort} ${ascDesc} LIMIT ${limit} OFFSET ${offset}`,
+        `SELECT * FROM user WHERE user_email LIKE "%${search}%" ORDER BY ${sort} ${ascDesc} LIMIT ${limit} OFFSET ${offset}`,
         (error, result) => {
           !error ? resolve(result) : reject(new Error(error));
         }
@@ -54,8 +54,6 @@ module.exports = {
       connection.query(
         `SELECT user_id, user_email, user_name, user_role, user_status, user_updated_at FROM user WHERE user_id = ${id}`,
         (error, result) => {
-          // console.log(error);
-          // console.log(result);
           !error ? resolve(result) : reject(new Error(error));
         }
       );

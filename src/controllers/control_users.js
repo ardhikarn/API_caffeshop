@@ -74,7 +74,6 @@ module.exports = {
     };
     try {
       const result = await getUser(limit, offset, search, sort, ascDesc);
-      console.log(result);
       // proses set data result ke dalam redis
       const newResult = {
         result,
@@ -106,19 +105,18 @@ module.exports = {
       user_password: encryptPassword,
       user_name,
       user_role: 2,
-      user_status: 0,
+      user_status: 1,
       user_created_at: new Date(),
     };
-    // console.log(user_email);
     try {
       // kondisi jika email sama tidak bisa
       const checkEmail = await checkUser(user_email);
-      if (user_email === "" || user_email.search("@") < 0) {
-        return helper.response(response, 400, "Valid Email is Required");
+      if (user_name === "") {
+        return helper.response(response, 400, "Username is Required");
       } else if (checkEmail.length >= 1) {
         return helper.response(response, 400, "Email Already Used");
-      } else if (user_name === "") {
-        return helper.response(response, 400, "Username is Required");
+      } else if (user_email === "" || user_email.search("@") < 0) {
+        return helper.response(response, 400, "Valid Email is Required");
       } else if (user_password.length < 8) {
         return helper.response(
           response,
@@ -205,7 +203,6 @@ module.exports = {
         user_updated_at: new Date(),
       };
       const checkId = await getUserById(id);
-      console.log(checkId);
       if (checkId.length > 0) {
         const result = await patchUser(updateUser, id);
         return helper.response(response, 200, `User id: ${id} Updated`, result);
