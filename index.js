@@ -27,6 +27,8 @@ app.get("*", (request, response) => {
   response.status(404).send("Path Not Found");
 });
 
-app.listen(3000, "127.0.0.1", () => {
-  console.log("App is Running on host: 127.0.0.1 and port: 3000");
+app.listen(process.env.PORT, process.env.IP, () => {
+  console.log(
+    `App is Running on host: ${process.env.IP} and port: ${process.env.PORT}`
+  );
 });

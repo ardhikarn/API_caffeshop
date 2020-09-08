@@ -1,6 +1,6 @@
 <h1 align="center">ExpressJS - #CAFFESHOP RESTfull API</h1>
 
-#background_projek. [More about Express](https://en.wikipedia.org/wiki/Express.js)
+This project is a my backend project, the name is Caffeshop App. Its main purpose is to make cafe or shop owner easier to checkout and manage datas in database. More about Express. [More about Express](https://en.wikipedia.org/wiki/Express.js)
 
 ## Built With
 
@@ -20,7 +20,7 @@
 2. Type `npm install`
 3. Make new file a called **.env**, set up first [here](#set-up-env-file)
 4. Turn on Web Server and MySQL can using Third-party tool like xampp, etc.
-5. Create a database with the name #nama_database, and Import file sql to **phpmyadmin**
+5. Create a database with the name caffeshop, and Import file sql to **phpmyadmin**
 6. Open Postman desktop application or Chrome web app extension that has installed before
 7. Choose HTTP Method and enter request url.(ex. localhost:3000/)
 8. You can see all the end point [here](#end-point)
@@ -34,6 +34,8 @@ DB_HOST=localhost // Database host
 DB_USER=root // Database user
 DB_PASS= // Database password
 DB_DB=caffe-shop // Database name
+PORT=3000 // PORT
+IP=127.0.0.1 // IP
 ```
 
 ## End Point
@@ -76,4 +78,6 @@ DB_DB=caffe-shop // Database name
 - `/product/:id` (Delete product by id)
 - `/category/:id` (Delete category by id)
 
-# week6-web3-intermediate_backend
+## Postman
+
+Link Postman : https://www.getpostman.com/collections/e96172b4ff299c2bba16
