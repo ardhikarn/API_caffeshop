@@ -10,7 +10,7 @@ const { getUserRedis } = require("../middleware/redis");
 
 router.get("/", authorizationAdmin, getUserRedis, getAllUser);
 router.post("/register", registerUser);
-router.get("/login", loginUser);
+router.post("/login", loginUser);
 router.patch("/edit/:id", authorizationAdmin, patchUser);
 
 module.exports = router;
