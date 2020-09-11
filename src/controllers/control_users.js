@@ -105,7 +105,7 @@ module.exports = {
       user_password: encryptPassword,
       user_name,
       user_role: 2,
-      user_status: 1,
+      user_status: 0,
       user_created_at: new Date(),
     };
     try {
@@ -125,7 +125,12 @@ module.exports = {
         );
       } else {
         const result = await postUser(addData);
-        return helper.response(response, 200, "Success Register User", result);
+        return helper.response(
+          response,
+          200,
+          "Success Register User, Contact Admin for activation account",
+          result
+        );
       }
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
@@ -161,10 +166,10 @@ module.exports = {
             return helper.response(
               response,
               400,
-              "Your account is not activate, contact admin for help"
+              "Your account is not activate, contact admin for activation"
             );
           } else {
-            const token = jwt.sign(payload, "RAHASIA", { expiresIn: "24h" });
+            const token = jwt.sign(payload, "RAHASIA", { expiresIn: "12h" });
             payload = { ...payload, token };
             return helper.response(response, 200, "Success Login!", payload);
           }

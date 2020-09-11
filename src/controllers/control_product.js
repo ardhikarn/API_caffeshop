@@ -2,6 +2,8 @@ const {
   getProduct,
   getProductCount,
   getProductById,
+  getProductByName,
+  getProductCountByName,
   postProduct,
   patchProduct,
   deleteProduct,
@@ -44,19 +46,13 @@ const getNextLink = (page, totalPage, currentQuery) => {
 
 module.exports = {
   getProduct: async (request, response) => {
-    let { page, limit, search, sort, ascDesc } = request.query;
+    let { page, limit, sort } = request.query;
     page === "" || page === undefined ? (page = 1) : (page = parseInt(page));
     limit === "" || limit === undefined
-      ? (limit = 5)
+      ? (limit = 6)
       : (limit = parseInt(limit));
-    if (search === "" || search === undefined) {
-      search = "";
-    }
     if (sort === "" || sort === undefined) {
       sort = "product_id";
-    }
-    if (ascDesc === "" || ascDesc === undefined) {
-      ascDesc = "ASC";
     }
     let totalData = await getProductCount();
     let totalPage = Math.ceil(totalData / limit);
@@ -72,24 +68,58 @@ module.exports = {
       nextLink: nextLink && `http://127.0.0.1:3000/product?${nextLink}`,
     };
     try {
-      const result = await getProduct(limit, offset, search, sort, ascDesc);
+      const result = await getProduct(sort, limit, offset);
       // proses set data result ke dalam redis
-      const newResult = {
-        result,
-        pageInfo,
+      if (result.length > 0) {
+        const newResult = {
+          result,
+          pageInfo,
+        };
+        client.setex(
+          `getProduct:${JSON.stringify(request.query)}`,
+          3600,
+          JSON.stringify(newResult)
+        );
+        return helper.response(
+          response,
+          200,
+          "Success Get Data Product",
+          result,
+          pageInfo
+        );
+      } else {
+        return helper.response(
+          response,
+          200,
+          "Success Get Product",
+          [],
+          pageInfo
+        );
+      }
+    } catch (error) {
+      return helper.response(response, 400, "Bad Request", error);
+    }
+  },
+  getProductByName: async (request, response) => {
+    const { search } = request.query;
+    const limit = 50;
+    const totalData = await getProductCountByName(search);
+    try {
+      const searchResult = await getProductByName(search, limit);
+      const result = {
+        searchResult,
+        totalData,
       };
-      client.setex(
-        `getProduct:${JSON.stringify(request.query)}`,
-        3600,
-        JSON.stringify(newResult)
-      );
-      return helper.response(
-        response,
-        200,
-        "Success Get Data Product",
-        result,
-        pageInfo
-      );
+      if (searchResult.length > 0) {
+        client.setex(
+          `searchproduct:${JSON.stringify(request.query)}`,
+          3600,
+          JSON.stringify(result)
+        );
+        return helper.response(response, 200, "Success Get Product", result);
+      } else {
+        return helper.response(response, 200, "Success Get Product", result);
+      }
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
     }
@@ -129,6 +159,25 @@ module.exports = {
         product_created_at: new Date(),
         product_status,
       };
+      if (
+        addData.product_name === undefined ||
+        addData.product_name === "" ||
+        addData.product_image === undefined ||
+        addData.product_image === "" ||
+        addData.product_price === undefined ||
+        addData.product_price === "" ||
+        addData.category_id === undefined ||
+        addData.category_id === "" ||
+        addData.product_status === undefined ||
+        addData.product_status === ""
+      ) {
+        return helper.response(
+          response,
+          400,
+          "Form data must be complete",
+          null
+        );
+      }
       const result = await postProduct(addData);
       return helper.response(response, 200, "Product Created", result);
     } catch (error) {
@@ -144,31 +193,51 @@ module.exports = {
         category_id,
         product_status,
       } = request.body;
+      const product_image = request.file;
+      if (
+        product_name == undefined ||
+        product_name == "" ||
+        product_price == undefined ||
+        product_price == "" ||
+        category_id == undefined ||
+        category_id == "" ||
+        product_status == undefined ||
+        product_status == ""
+      ) {
+        return helper.response(
+          response,
+          400,
+          "Form data must be complete",
+          null
+        );
+      }
+      const checkId = await getProductById(id);
       const updateData = {
         product_name,
         product_price,
-        product_image: request.file === undefined ? "" : request.file.filename,
         category_id,
         product_updated_at: new Date(),
         product_status,
       };
-      const checkId = await getProductById(id);
-      if (checkId.length > 0) {
-        fs.unlink(`./uploads/${checkId[0].product_image}`, async (error) => {
-          if (error) {
-            throw error;
-          } else {
-            const result = await patchProduct(updateData, id);
-            return helper.response(
-              response,
-              200,
-              `Product id: ${id} Updated`,
-              result
-            );
-          }
-        });
+      if (product_image === "" || product_image === undefined) {
+        try {
+          const result = await patchProduct(updateData, id);
+          return helper.response(response, 201, "Product Updated", result);
+        } catch (error) {
+          return helper.response(response, 400, "Bad Request", error);
+        }
       } else {
-        return helper.response(response, 404, `Product id: ${id} not Found`);
+        try {
+          const image = checkId[0].product_image;
+          fs.unlink(`./uploads/${image}`, function (error) {
+            if (error) throw error;
+          });
+          updateData.product_image = product_image.filename;
+          const result = await patchProduct(updateData, id);
+          return helper.response(response, 201, "Product Updated", result);
+        } catch (error) {
+          return helper.response(response, 400, "Bad Request", error);
+        }
       }
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
@@ -179,28 +248,17 @@ module.exports = {
       const { id } = request.params;
       const checkId = await getProductById(id);
       if (checkId.length > 0) {
-        fs.unlink(`./uploads/${checkId[0].product_image}`, async (error) => {
-          if (!error) {
-            const result = await deleteProduct(id);
-            return helper.response(
-              response,
-              200,
-              `Data Product and Data Redis: id ${id} Deleted`
-            );
-          } else {
-            return helper.response(
-              response,
-              201,
-              "File doesn't exist, won't remove it.",
-              error
-            );
-          }
+        const result = await deleteProduct(id);
+        const image = checkId[0].product_image;
+        fs.unlink(`./uploads/${image}`, function (error) {
+          if (error) throw error;
         });
+        return helper.response(response, 201, "Product Deleted", result);
       } else {
-        return helper.response(response, 200, `Data id: ${id} Deleted`);
+        return helper.response(response, 404, `Product By Id ${id} not Found`);
       }
-    } catch (error) {
-      return helper.response(response, 400, "Bad Request", error);
+    } catch (e) {
+      return helper.response(response, 400, "Bad Request", e);
     }
   },
 };

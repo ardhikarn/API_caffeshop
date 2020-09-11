@@ -26,8 +26,9 @@ module.exports = {
           return helper.response(
             response,
             200,
-            "Success Get Data",
-            JSON.parse(result)
+            "Success Get Product",
+            JSON.parse(result).result,
+            JSON.parse(result).pageInfo
           );
         }
         next();

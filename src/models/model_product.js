@@ -1,13 +1,35 @@
 const connection = require("../config/mysql");
 
 module.exports = {
-  getProduct: (limit, offset, search, sort, ascDesc) => {
+  getProduct: (sort, limit, offset) => {
     return new Promise((resolve, reject) => {
       connection.query(
-        `SELECT * FROM product WHERE product_name LIKE "%${search}%" ORDER BY ${sort} ${ascDesc} LIMIT ? OFFSET ?`,
+        `SELECT product.product_id, product.product_name, product.product_image, product.product_price, category.category_id, category.category_name, product.product_created_at, product.product_updated_at, product.product_status FROM product INNER JOIN category ON product.category_id = category.category_id ORDER BY ${sort} LIMIT ? OFFSET ?`,
         [limit, offset],
         (error, result) => {
           !error ? resolve(result) : reject(new Error(error));
+        }
+      );
+    });
+  },
+  getProductByName: (search, limit) => {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        "SELECT product.product_id, product.product_name, product.product_image, product.product_price, category.category_name, product.product_created_at, product.product_updated_at, product.product_status FROM product INNER JOIN category ON product.category_id = category.category_id WHERE product.product_name LIKE ? LIMIT ?",
+        [`%${search}%`, limit],
+        (error, result) => {
+          !error ? resolve(result) : reject(new Error(error));
+        }
+      );
+    });
+  },
+  getProductCountByName: (search) => {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        "SELECT COUNT(*) as total FROM product WHERE product_name LIKE ?",
+        `%${search}%`,
+        (error, result) => {
+          !error ? resolve(result[0].total) : reject(new Error(error));
         }
       );
     });

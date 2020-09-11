@@ -46,7 +46,7 @@ module.exports = {
     let { page, limit, sort } = request.query;
     page === "" || page === undefined ? (page = 1) : (page = parseInt(page));
     limit === "" || limit === undefined
-      ? (limit = 5)
+      ? (limit = 6)
       : (limit = parseInt(limit));
     const totalData = await getOrderCount();
     if (sort === "" || sort === undefined) {
@@ -84,13 +84,7 @@ module.exports = {
           pageInfo
         );
       } else {
-        return helper.response(
-          response,
-          404,
-          "Order Not Found",
-          result,
-          pageInfo
-        );
+        return helper.response(response, 404, "Order Not Found", [], pageInfo);
       }
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
@@ -151,7 +145,7 @@ module.exports = {
         const result2 = await postOrder(setDataOrder);
         subTotal += result2.order_total_price;
       }
-      // const ppn = subTotal * 0.1;
+      const ppn = subTotal * 0.1;
       const history_subtotal = subTotal + subTotal * 0.1;
       const setData3 = {
         history_subtotal,
@@ -163,7 +157,7 @@ module.exports = {
         history_id: dataHistory[0].history_id,
         invoice: dataHistory[0].history_invoice,
         orders: dataOrders,
-        // ppn,
+        ppn,
         subtotal: dataHistory[0].history_subtotal,
         history_created_at: dataHistory[0].history_created_at,
       };

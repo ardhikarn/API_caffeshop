@@ -3,8 +3,8 @@ const {
   getHistoryCount,
   getHistoryById,
   getHistoryToday,
-  getHistoryMonth,
   getHistoryWeek,
+  getHistoryMonth,
   getHistoryTodayIncome,
   getCountHistoryWeek,
   getHistoryYearIncome,
@@ -46,7 +46,7 @@ module.exports = {
     let { page, limit, sort } = request.query;
     page === "" || page === undefined ? (page = 1) : (page = parseInt(page));
     limit === "" || limit === undefined
-      ? (limit = 5)
+      ? (limit = 6)
       : (limit = parseInt(limit));
     if (sort === "" || sort === undefined) {
       sort = "history_id";
@@ -107,10 +107,12 @@ module.exports = {
       dataOrder.forEach((value) => {
         total += value.order_total_price;
       });
+      const ppn = (total * 10) / 100;
       const result = {
         history_id: dataHistory[0].history_id,
         invoice: dataHistory[0].history_invoice,
         orders: dataOrder,
+        ppn,
         subtotal: dataHistory[0].history_subtotal,
         history_created_at: dataHistory[0].history_created_at,
       };

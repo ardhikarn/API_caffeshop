@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const {
   getProduct,
+  getProductByName,
   getProductById,
   postProduct,
   patchProduct,
@@ -15,6 +16,7 @@ const {
 const uploadFilter = require("../middleware/multer");
 
 router.get("/", authorization, getProductRedis, getProduct);
+router.get("/search", authorization, getProductByName);
 router.get("/:id", authorization, getProductByIdRedis, getProductById);
 
 router.post(
