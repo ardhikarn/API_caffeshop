@@ -6,12 +6,15 @@ const {
   checkUser,
   getUserById,
   patchUser,
+  changeData,
+  checkKey,
 } = require("../models/model_users");
 const jwt = require("jsonwebtoken");
 const helper = require("../helper/helper");
 const qs = require("qs");
 const redis = require("redis");
 const client = redis.createClient();
+const nodemailer = require("nodemailer");
 
 const getPrevLink = (page, currentQuery) => {
   if (page > 1) {
@@ -121,7 +124,7 @@ module.exports = {
         return helper.response(
           response,
           400,
-          "minimum 8 character is Required"
+          "minimum 8 character password is Required"
         );
       } else {
         const result = await postUser(addData);
@@ -216,6 +219,120 @@ module.exports = {
       }
     } catch (error) {
       return helper.response(response, 400, "Bad Request", error);
+    }
+  },
+  sendEmailForgot: async (request, response) => {
+    try {
+      const { user_email } = request.body;
+      const key = Math.round(Math.random() * 100000);
+      const checkData = await checkUser(user_email);
+      if (checkData.length >= 1) {
+        const data = {
+          user_key: key,
+          user_updated_at: new Date(),
+        };
+        await changeData(data, user_email);
+        const transporter = nodemailer.createTransport({
+          host: "smtp.gmail.com",
+          port: 465,
+          secure: true,
+          auth: {
+            user: process.env.USER_EMAIL,
+            pass: process.env.USER_PASS,
+          },
+        });
+        await transporter.sendMail({
+          from: '"Rythz-Pos"',
+          to: user_email,
+          subject: "Rythz-Pos - Forgot Password",
+          text: "Save your Password !",
+          html: `<a href="http://localhost:8080/new-password?keys=${keys}">Click Here To Change Your Password</a>`,
+        }),
+          function (error) {
+            if (error) {
+              return helper.response(response, 400, "Email not Sent !");
+            }
+          };
+        return helper.response(response, 200, "Email has been Sent");
+      } else {
+        return helper.response(response, 400, "Email is not Registered");
+      }
+    } catch (error) {
+      return helper.response(response, 400, "Bad Request");
+    }
+  },
+  changePassword: async (request, response) => {
+    try {
+      const { key } = request.query;
+      const { user_password } = request.body;
+      const checkData = await checkKey(key);
+      if (
+        request.query.key === undefined ||
+        request.query.key === "" ||
+        request.query.key === null
+      ) {
+        return helper.response(response, 400, "Invalid Key");
+      }
+      if (checkData.length >= 1) {
+        const email = checkData[0].user_email;
+        let setData = {
+          user_key: key,
+          user_password,
+          user_updated_at: new Date(),
+        };
+        const limit = setData.user_updated_at - checkData[0].user_updated_at;
+        const timeLimit = Math.floor(limit / 1000 / 60);
+        if (timeLimit > 5) {
+          const resetData = {
+            user_key: "",
+            user_updated_at: new Date(),
+          };
+          await changeData(resetData, email);
+          return helper.response(response, 400, "Key Expired");
+        } else if (
+          request.body.user_password === undefined ||
+          request.body.user_password === "" ||
+          request.body.user_password === null
+        ) {
+          return helper.response(response, 400, "Password  is Required !");
+        } else if (
+          request.body.confirm_password === undefined ||
+          request.body.confirm_password === "" ||
+          request.body.confirm_password === null
+        ) {
+          return helper.response(
+            response,
+            400,
+            "Confirm Password  is Required !"
+          );
+        } else if (request.body.user_password.length < 8) {
+          return helper.response(
+            response,
+            400,
+            "input password minimum 8 character !"
+          );
+        } else if (
+          request.body.user_password !== request.body.confirm_password
+        ) {
+          return helper.response(response, 400, "Password not match !");
+        } else {
+          const salt = bcrypt.genSaltSync(10);
+          const encryptPass = bcrypt.hashSync(user_password, salt);
+          setData.user_password = encryptPass;
+          setData.user_key = "";
+        }
+        const result = await changeData(setData, email);
+        return helper.response(
+          response,
+          200,
+          "Success Change Password !",
+          result
+        );
+      } else {
+        return helper.response(response, 400, "Invalid key");
+      }
+    } catch (error) {
+      return helper.response(response, 400, "Bad Request");
     }
   },
 };
