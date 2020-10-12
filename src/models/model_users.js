@@ -1,10 +1,11 @@
 const connection = require("../config/mysql");
 
 module.exports = {
-  getUser: (limit, offset, search, sort, ascDesc) => {
+  getUser: (limit, offset) => {
     return new Promise((resolve, reject) => {
       connection.query(
-        `SELECT * FROM user WHERE user_email LIKE "%${search}%" ORDER BY ${sort} ${ascDesc} LIMIT ${limit} OFFSET ${offset}`,
+        "SELECT * FROM user ORDER BY user_id LIMIT ? OFFSET ?",
+        [limit, offset],
         (error, result) => {
           !error ? resolve(result) : reject(new Error(error));
         }
@@ -45,6 +46,28 @@ module.exports = {
         email,
         (error, result) => {
           !error ? resolve(result) : reject(new Error(error));
+        }
+      );
+    });
+  },
+  getUserByEmail: (email) => {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        "SELECT * FROM user WHERE user_email LIKE ?",
+        `%${email}%`,
+        (error, result) => {
+          !error ? resolve(result) : reject(new Error(error));
+        }
+      );
+    });
+  },
+  getUserCountByEmail: (search) => {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        "SELECT COUNT(*) as total FROM user WHERE user_name LIKE ?",
+        `%${search}%`,
+        (error, result) => {
+          !error ? resolve(result[0].total) : reject(new Error(error));
         }
       );
     });
