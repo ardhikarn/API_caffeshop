@@ -46,7 +46,7 @@ module.exports = {
     let { page, limit, sort } = request.query;
     page === "" || page === undefined ? (page = 1) : (page = parseInt(page));
     limit === "" || limit === undefined
-      ? (limit = 6)
+      ? (limit = 5)
       : (limit = parseInt(limit));
     if (sort === "" || sort === undefined) {
       sort = "history_id";

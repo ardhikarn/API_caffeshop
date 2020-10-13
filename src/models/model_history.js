@@ -4,7 +4,7 @@ module.exports = {
   getAllHistory: (limit, offset, sort) => {
     return new Promise((resolve, reject) => {
       connection.query(
-        `SELECT * FROM history ORDER BY ${sort} LIMIT ? OFFSET ?`,
+        `SELECT user.user_name, history.history_id, history.history_invoice, history.history_subtotal, history.history_created_at FROM history JOIN user ON history.user_id = user.user_id ORDER BY ${sort} LIMIT ? OFFSET ?`,
         [limit, offset],
         (error, result) => {
           !error ? resolve(result) : reject(new Error(error));
@@ -15,7 +15,7 @@ module.exports = {
   getHistoryToday: () => {
     return new Promise((resolve, reject) => {
       connection.query(
-        "SELECT * FROM history WHERE DAY(history_created_at) = DAY(NOW()) AND MONTH(history_created_at) = MONTH(NOW()) AND YEAR(history_created_at) = YEAR(NOW())",
+        "SELECT user.user_name, history.history_id, history.history_invoice, history.history_subtotal, history.history_created_at FROM history JOIN user ON history.user_id = user.user_id WHERE DAY(history_created_at) = DAY(NOW()) AND MONTH(history_created_at) = MONTH(NOW()) AND YEAR(history_created_at) = YEAR(NOW())",
         (error, result) => {
           !error ? resolve(result) : reject(new Error(error));
         }
@@ -25,7 +25,7 @@ module.exports = {
   getHistoryMonth: () => {
     return new Promise((resolve, reject) => {
       connection.query(
-        "SELECT * FROM history WHERE MONTH(history_created_at) = MONTH(NOW()) AND YEAR(history_created_at) = YEAR(NOW())",
+        "SELECT user.user_name, history.history_id, history.history_invoice, history.history_subtotal, history.history_created_at FROM history JOIN user ON history.user_id = user.user_id WHERE MONTH(history_created_at) = MONTH(NOW()) AND YEAR(history_created_at) = YEAR(NOW())",
         (error, result) => {
           !error ? resolve(result) : reject(new Error(error));
         }
@@ -35,7 +35,7 @@ module.exports = {
   getHistoryWeek: () => {
     return new Promise((resolve, reject) => {
       connection.query(
-        "SELECT * FROM history WHERE WEEK(history_created_at) = WEEK(NOW()) AND YEAR(history_created_at) = YEAR(NOW())",
+        "SELECT user.user_name, history.history_id, history.history_invoice, history.history_subtotal, history.history_created_at FROM history JOIN user ON history.user_id = user.user_id WHERE WEEK(history_created_at) = WEEK(NOW()) AND YEAR(history_created_at) = YEAR(NOW())",
         (error, result) => {
           !error ? resolve(result) : reject(new Error(error));
         }

@@ -119,6 +119,7 @@ module.exports = {
       // menentukan random invoice
       const history_invoice = Math.floor(100000 + Math.random() * 900000);
       const setData = {
+        user_id: request.body.user_id,
         history_invoice,
         history_subtotal: 0,
         history_created_at: new Date(),
