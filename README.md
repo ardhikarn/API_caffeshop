@@ -1,5 +1,7 @@
 <h1 align="center">ExpressJS - #CAFFESHOP RESTfull API</h1>
 
+## About The Project
+
 This project is a my backend project, the name is Caffeshop App. Its main purpose is to make cafe or shop owner easier to checkout and manage datas in database. More about Express. [More about Express](https://en.wikipedia.org/wiki/Express.js)
 
 ## Built With
@@ -22,8 +24,8 @@ This project is a my backend project, the name is Caffeshop App. Its main purpos
 4. Turn on Web Server and MySQL can using Third-party tool like xampp, etc.
 5. Create a database with the name caffeshop, and Import file sql to **phpmyadmin**
 6. Open Postman desktop application or Chrome web app extension that has installed before
-7. Choose HTTP Method and enter request url.(ex. localhost:3000/)
-8. You can see all the end point [here](#end-point)
+7. Choose HTTP Method and enter request url.(ex. http://127.0.0.1:3000/)
+8. You can see all the end point [here](#postman-documentation)
 
 ## Set up .env file
 
@@ -34,50 +36,17 @@ DB_HOST=localhost // Database host
 DB_USER=root // Database user
 DB_PASS= // Database password
 DB_DB=caffe-shop // Database name
+
 PORT=3000 // PORT
 IP=127.0.0.1 // IP
+URL=http://localhost:8080 //URL to your local website
+
+USER= //Input your email here
+PASS= //Input your email's password here
+
+KEY=RAHASIA
 ```
 
-## End Point
+## Postman Documentation
 
-**1. GET**
-
-- `/users` (Get all user)
-- `/users/login` (Login user)
-- `/product` (Get all product)
-- `/product/:id` (Get product by id)
-- `/category` (Get all category)
-- `/category/:id` (Get category By Id)
-- `/order` (Get all order)
-- `/order/:id` (Get order By Id)
-- `/history` (Get all history)
-- `/history/:id` (Get history By Id)
-
-**2. POST**
-
-- `/users/register` (Register user)
-  - `{ "user_name": "admin", "user_email": "admin@caffeshop.com", "user_password": 12345678, "user_role": 2, "user_status": 0 }`
-- `/product` (Post product)
-  - `{ "product_name": "espresso", "product_image": "#", "category_id": 1, "product_price": 10000 , "product_status" : 1 | 0}`
-- `/category` (Post category)
-  - `{ "category_name": "coffe", "category_status": 1 }`
-- `/order` (Post order)
-  - `{ "orders": [{ "product_id": 1, "order_qty": 2 }, { "product_id": 2, "order_qty": 2 }] }`
-
-**3. PATCH**
-
-- `/users/edit/:id` (Update user by id)
-  - `{"user_name": "admin", "user_email": "admin@caffeshop.com", "user_password": 12345678, "user_role": 2, "user_status": 0}`
-- `/product/:id` (Update product by id)
-  - `{"product_name" : "coffe latte", "product_image": "#", "category_id" : 1, "product_harga" : 15000, "product_status" : 1 | 0}`
-- `/category/:id` (Update category by id)
-  - `{ "category_name": "coffe", "category_status": 1 }`
-
-**4. DELETE**
-
-- `/product/:id` (Delete product by id)
-- `/category/:id` (Delete category by id)
-
-## Postman
-
-Link Postman : https://www.getpostman.com/collections/e96172b4ff299c2bba16
+Link Postman click [here] (#https://documenter.getpostman.com/view/11699211/TVRoX655)
