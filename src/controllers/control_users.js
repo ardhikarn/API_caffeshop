@@ -215,7 +215,7 @@ module.exports = {
               "Your account is not activate, contact admin for activation"
             );
           } else {
-            const token = jwt.sign(payload, "RAHASIA", { expiresIn: "12h" });
+            const token = jwt.sign(payload, process.env.KEY, { expiresIn: "12h" });
             payload = { ...payload, token };
             return helper.response(response, 200, "Success Login!", payload);
           }

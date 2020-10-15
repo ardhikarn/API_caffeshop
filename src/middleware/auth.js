@@ -7,7 +7,7 @@ module.exports = {
     if (token) {
       // validasi token jwt
       token = token.split(" ")[1];
-      jwt.verify(token, "RAHASIA", (error, result) => {
+      jwt.verify(token, process.env.KEY, (error, result) => {
         if (
           (error && error.name === "JsonWebTokenError") ||
           (error && error.name === "TokenExpiredError")
@@ -26,7 +26,7 @@ module.exports = {
     let token = request.headers.authorization;
     if (token) {
       token = token.split(" ")[1];
-      jwt.verify(token, "RAHASIA", (error, result) => {
+      jwt.verify(token, process.env.KEY, (error, result) => {
         if (
           (error && error.name === "JsonWebTokenError") ||
           (error && error.name === "TokenExpiredError")
