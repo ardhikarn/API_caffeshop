@@ -143,7 +143,6 @@ module.exports = {
   },
   registerUser: async (request, response) => {
     const { user_email, user_password, user_name } = request.body;
-    // utk merubah password agar di enkripsi
     const salt = bcrypt.genSaltSync(10);
     const encryptPassword = bcrypt.hashSync(user_password, salt);
     const addData = {
@@ -155,7 +154,6 @@ module.exports = {
       user_created_at: new Date(),
     };
     try {
-      // kondisi jika email sama tidak bisa
       const checkEmail = await checkUser(user_email);
       if (user_name === "") {
         return helper.response(response, 400, "Username is Required");
@@ -179,6 +177,7 @@ module.exports = {
         );
       }
     } catch (error) {
+      console.log(error)
       return helper.response(response, 400, "Bad Request", error);
     }
   },
