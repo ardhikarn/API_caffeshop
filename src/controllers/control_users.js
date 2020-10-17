@@ -291,8 +291,8 @@ module.exports = {
           port: 465,
           secure: true,
           auth: {
-            user: process.env.USER_EMAIL,
-            pass: process.env.USER_PASS,
+            user: process.env.USER,
+            pass: process.env.PASS,
           },
         });
         await transporter.sendMail({
@@ -384,6 +384,46 @@ module.exports = {
         );
       } else {
         return helper.response(response, 400, "Invalid key");
+      }
+    } catch (error) {
+      return helper.response(response, 400, "Bad Request");
+    }
+  },
+  sendEmailOrder: async (request, response) => {
+    try {
+      const { user_email } = request.body;
+      const key = Math.round(Math.random() * 100000);
+      const checkData = await checkUser(user_email);
+      if (checkData.length >= 1) {
+        const data = {
+          user_key: key,
+          user_updated_at: new Date(),
+        };
+        await changeData(data, user_email);
+        const transporter = nodemailer.createTransport({
+          host: "smtp.gmail.com",
+          port: 465,
+          secure: true,
+          auth: {
+            user: process.env.USER,
+            pass: process.env.PASS,
+          },
+        });
+        await transporter.sendMail({
+          from: '"Rythz-Pos"',
+          to: user_email,
+          subject: "Rythz-Pos - Notification",
+          text: "Thank You for Order :)",
+          html: `INI PESANAN ANDA`,
+        }),
+          function (error) {
+            if (error) {
+              return helper.response(response, 400, "Email not Sent !");
+            }
+          };
+        return helper.response(response, 200, "Email has been Sent");
+      } else {
+        return helper.response(response, 400, "Email is not Registered");
       }
     } catch (error) {
       return helper.response(response, 400, "Bad Request");
