@@ -55,7 +55,7 @@ module.exports = {
   getHistoryTodayIncome: () => {
     return new Promise((resolve, reject) => {
       connection.query(
-        "SELECT SUM(history_subtotal) AS total_income, history_created_at FROM history WHERE YEAR(history_created_at) = YEAR(NOW()) AND MONTH(history_created_at) = MONTH(NOW()) AND DAY(history_created_at) = DAY(NOW())",
+        "SELECT SUM(history_subtotal) AS total_income, history_created_at FROM history WHERE YEAR(history_created_at) = YEAR(NOW()) AND MONTH(history_created_at) = MONTH(NOW()) AND DAY(history_created_at) = DAY(NOW()) GROUP BY DAY(NOW())",
         (error, result) => {
           !error ? resolve(result) : reject(new Error(error));
         }
