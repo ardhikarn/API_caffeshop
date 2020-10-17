@@ -206,7 +206,7 @@ module.exports = {
       client.setex("getHistoryTodayIncome", 3600, JSON.stringify(result));
       return helper.response(response, 200, "Success Get Total Income", result);
     } catch (error) {
-      return helper.response(response, 400, "Bad Request", error);
+      return helper.response(response, 400, "Bad Requestt", error);
     }
   },
   getCountHistoryWeek: async (request, response) => {
