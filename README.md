@@ -1,4 +1,4 @@
-<h1 align="center">ExpressJS - #CAFFESHOP RESTfull API</h1>
+<h1 align="center">ExpressJS - RYTHZPOS RESTfull API</h1>
 
 ## About The Project
 
@@ -35,7 +35,7 @@ Open .env file on your favorite code editor, and copy paste this code below :
 DB_HOST=localhost // Database host
 DB_USER=root // Database user
 DB_PASS= // Database password
-DB_DB=caffe-shop // Database name
+DB_DB=rythz-pos // Database name
 
 PORT=3000 // PORT
 IP=127.0.0.1 // IP
@@ -44,7 +44,7 @@ URL=http://localhost:8080 //URL to your local website
 USER= //Input your email here
 PASS= //Input your email's password here
 
-KEY=RAHASIA
+KEY=RYTHZPOS
 ```
 
 ## Postman Documentation
