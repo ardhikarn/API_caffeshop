@@ -151,6 +151,7 @@ module.exports = {
       user_name,
       user_role: 2,
       user_status: 0,
+      user_key: 0,
       user_created_at: new Date(),
     };
     try {
