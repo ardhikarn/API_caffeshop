@@ -86,8 +86,7 @@ module.exports = {
           response,
           200,
           "Success Get Data User",
-          result,
-          pageInfo
+          newResult
         );
       } else {
         return helper.response(response, 200, "Get User Success", [], pageInfo);
@@ -178,7 +177,7 @@ module.exports = {
         );
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return helper.response(response, 400, "Bad Request", error);
     }
   },
@@ -215,7 +214,9 @@ module.exports = {
               "Your account is not activate, contact admin for activation"
             );
           } else {
-            const token = jwt.sign(payload, process.env.KEY, { expiresIn: "12h" });
+            const token = jwt.sign(payload, process.env.KEY, {
+              expiresIn: "12h",
+            });
             payload = { ...payload, token };
             return helper.response(response, 200, "Success Login!", payload);
           }

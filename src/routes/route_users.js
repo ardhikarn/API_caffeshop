@@ -8,12 +8,12 @@ const {
   patchUser,
   sendEmailForgot,
   changePassword,
-  sendEmailOrder
+  sendEmailOrder,
 } = require("../controllers/control_users");
 const { authorizationAdmin, authorization } = require("../middleware/auth");
 const { getUserRedis } = require("../middleware/redis");
 
-router.get("/", authorizationAdmin, getAllUser); //getUserRedis sementara dihapus
+router.get("/", authorizationAdmin, getUserRedis, getAllUser); //getUserRedis sementara dihapus
 router.get("/id/:id", authorization, getUserById);
 router.get("/search", authorization, getUserByEmail);
 router.post("/register", registerUser);

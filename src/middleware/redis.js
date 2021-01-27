@@ -260,7 +260,7 @@ module.exports = {
         return helper.response(
           response,
           200,
-          "Success Get Data User",
+          "Success Get Data User from Redis",
           JSON.parse(result)
         );
       }
